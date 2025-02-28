@@ -1,8 +1,3 @@
-library(tidyverse)
-library(plink2R)
-library(splines)
-library(fda)
-
 ## QC alleles from summary stats: flipping strand, etc
 allele.qc = function(a1,a2,ref1,ref2) {
     a1 = toupper(a1)
@@ -300,7 +295,7 @@ sctwas_assoc_fda <- function(
                  logsigma2vec=seq(-20,8,by=0.2)))
 {
     # Extract results from compute_weights_flasso. output.
-    wgt <- lapply(weights_pred, function(x) x$betamat[rowSums(x$betamat!=0)>0,,drop=FALSE])
+    wgt <- lapply(weights_pred, function(x) x$Wmat[rowSums(x$Wmat!=0)>0,,drop=FALSE])
 
     # Load in list of weights
     chr = unique(wgtlist$CHR)
