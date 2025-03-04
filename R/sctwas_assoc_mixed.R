@@ -200,7 +200,7 @@ ml_mixed <- function(logsigma2, wgt.matrix, bhat, eigR, ngwas, omegal, omega, om
 }
 
 ## Likelihood ratio test based on random-effects model
-# Here omega l is the inner product matrix for linear terms
+# Here omegal is the inner product matrix for linear terms
 # omega and omega2 do not include linear terms
 assoc_onegene <- function(
         wgt.matrix, bhat, R, ngwas, omegal, omega, omega2, method="ml",
@@ -280,16 +280,39 @@ assoc_onegene <- function(
 
 }
 
-# Association testing using scalar-on-function regression
-#' @param sumstat A data frame of GWAS summary statistics. Columns: SNP, A1, A2, Z
-#' @param wgtlist A data frame of gene annotation. Five columns: ID=geneid_short, CHR=seqname, P0=start, P1=end, tss.
-#' @param weights_pred A list where each each element is an output of compute_weights_flasso. The number and order of genes follow wgtlist. Named by gene ID (same as wgtlist$ID).
-#' @param bim_train bim file from the training data where prediction models are built. Should include all the SNPs in wgt.
+#' TWiST association analysis
+#' @description
+#' This function conducts single-cell TWAS analysis using GWAS summary statistics and weights trained in TWiST Stage-1 model. The output for each gene is an estimated curve representing gene-trait effects along the pseudotime course, as well as p-values for global, dynamic, and nonlinear test.
+#'
+#' @param sumstat A data frame of GWAS summary statistics. Columns: SNP (SNP ID), A1 (effect allele), A2 (other allele), Z (z-statistic for GWAS association).
+#' @param wgtlist A data frame of gene annotation. Five columns: ID (gene identifier), CHR (chromosome), P0 (start), P1 (end), tss (transcription start site).
+#' @param weights_pred Named list where each each element is an output of twist_train_model. The number and order of genes should be the same as \code{wgtlist}. Named by \code{wgtlist$ID}.
+#' @param bim_train bim file from the training data where prediction models are built. Should include all the SNPs in \code{weights_pred}
 #' @param genos Reference data in plink format used to compute LD. Can be read into R using plink2R. A list of length 3: bed, bim, fam. Usually 1000 Genomes.
-#' @param n_gwas GWAS sample size, can be SNP-specific or one integer.
-#' @param opt Options. max_impute (maximum proportion of missing SNPs). min_r2pred
-#' @param eta Tuning parameter for smoothness penalty. Default NULL, eta needs to be tuned using data thinning. Either a single number or the same length as weights_pred
-sctwas_assoc_fda <- function(
+#' @param ngwas GWAS sample size. If an integer, assumes all SNPs have the same sample size. Can also be a vector with SNP-specific sample sizes.
+#' @param opt Options, including \code{max_impute} (maximum proportion of missing SNPs), \code{min_r2pred} (miminum average GWAS Z-score imputation r2), \code{degree_beta} (degree of B-spline basis functions), \code{knots_beta} (degree of B-spline basis functions), \code{logsigma2vec} (candidate log-sigma2 values for grid search).
+#'
+#' @details
+#' TWiST association analysis is conducted using scalar-on-function regression, with the genetically regulated expression (denoted by \eqn{v_i(t)}) as the predictor and the trait as the outcome. This functions uses GWAS summary statistics instead of individual-level data.
+#' The estimated gene-trait effect is
+#' \deqn{\beta(t)=\beta_{l0}+\beta_{l01}t+\sum\limits_{m=1}^{M'}\beta_m\psi_m(t),}
+#' where \eqn{(\beta_{l0},\beta_{l01})^T} (\code{betal} in the R code) is the vector coefficients for the linear effects, and \eqn{(\beta_1,...,\beta_{M'})^T} (\code{beta} in the R code) is the vector of coefficients for the nonlinear effects.
+#'
+#' @return A list containing the following entries:
+#' \item{out.tbl}{A data frame containing gene and model information, including the following columns:
+#' ID (gene identifier), CHR (chromosome), P0 (start), P1 (end), tss (transcription start site), sigma2 (variance of coefficients of B-spline basis functions \eqn{\boldsymbol{\beta}}),
+#' p.global (p-value for global test), p.dynamic (p-value for dynamic test), p.nonlinear (p-value for nonlinear test), degree (degree of B-spline basis functions for \eqn{\beta(t)}.}
+#' \item{betal}{Estimated coefficients for linear component of gene-trait effect \eqn{\beta(t)}}
+#' \item{var.betal}{Variance-covariance matrix of \code{betal}.
+#' \item{beta}{Estimated coefficients for nonlinear component of gene-trait effect \eqn{\beta(t)}.}}
+#' \item{var.beta}{Variance-covariance matrix of \code{beta}.}
+#' \item{knots}{Knots for B-spline basis functions for gene-trait effect \eqn{\beta(t)}.}
+#'
+#' @examples
+#' # example code
+#'
+#' @export
+twist_association <- function(
         sumstat, wgtlist, weights_pred, bim_train, genos, ngwas,
         opt=list(max_impute=0.6, min_r2pred=0.8, degree_beta=3, knots_beta=seq(0.05,0.95,by=0.05),
                  logsigma2vec=seq(-20,8,by=0.2)))
