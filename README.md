@@ -39,12 +39,24 @@ load(paste0("public_data/twist_weights_",ctype,".rda"))
 ```
 
 This `.rda` file includes three objects:
-* `wgtlist`: Information of genes for which the model has been trained. A data frame of five columns
+* `wgtlist`: Information of genes for which the model has been trained. A data frame of five columns:
     * `ID`: Gene ID
     * `CHR`: Chromosome
     * `P0`: Gene start
     * `P1`: Gene end
     * `tss`: Transcription start site
+* `weights_pred`: Pre-trained prediction models. A list of which each entry is a gene, in the same order as `wgtlist$ID`. For each genes, the following four entries are available:
+    * `Wmat`: Coefficients of pre-trained prediction models. A matrix of (number of SNPs) x (number of B-spline bases).
+    * `knots`: Internal knots for B-spline basis functions that are used to model model SNP effects on gene expression. (boundary knots 0 and 1 are not included).
+    * `degree`: Degree of B-spline basis functions. 
+    * `n`: Number of cells in the eQTL data for model training.
+* `bim_train`: PLINK bim file from the training data where prediction models were built. Should include all the SNPs in `weights_pred`. A data frame including the following columns
+    * `CHR`: Chromosome
+    * `SNP`: SNP ID
+    * `cM`: SNP position in centimorgan
+    * `BP`: SNP position in base pair
+    * `A1`: Effect allele
+    * `A2`: Other allele
 
 
 
