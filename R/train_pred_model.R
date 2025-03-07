@@ -17,23 +17,16 @@
 #' \item{lambda.seq}{Number of \code{lambda}'s to test in cross-validation.}
 #' Other entries are \code{beta}, \code{family}, \code{group}, \code{lambda}, \code{alpha}, \code{deviance}, \code{linear.predictors}, \code{n}, \code{penalty}, \code{df}, \code{iter}, \code{group.multiplier}, \code{y}. See \code{grpreg} package (https://cran.r-project.org/web/packages/grpreg/index.html) for details.
 #'
-#' @examples
-#' library(DAESC)
-#' data("example", package="DAESC")
-#' res.bb <- daesc_bb(y=df$y, n=df$n, subj=df$subj, x=cbind(1,df$x), xnull=matrix(1,nrow=nrow(df),ncol=1), niter=200, niter_laplace=2, num.nodes=3,
-#' optim.method="BFGS", converge_tol=1e-8)
-#' str(res.bb)
-#'
 #' @details
 #' The unique molecular identifier (UMI) count that represents gene expression (for cell j in individual) is modeled using Poisson distribution with mean \eqn{\mu_{ij}}. The mean is further modeled using a log-linear model of genetically regulated expression (GRex) and covariates:
-#'
 #' \deqn{\log(\mu_{ij})=c_0 + \log(\alpha_{ij}) + v_i(t_{ij}) +\gamma^T\boldsymbol{z}_{ij},}
-#'
 #' where \eqn{c_0} is the intercept \eqn{\alpha_{ij}} is the library size, \eqn{v_i(t_{ij})} is the GReX, and \eqn{\boldsymbol{z}_{ij}} is a vector of the covariates. The GReX is modeled using a functional linear model of cis-SNPs:
 #' \eqn{v_i(t)=\sum\limits_{k} w_k(t)g_{ik}}, where \eqn{g_{ik}} is SNP k of individual i, and \eqn{w_k(t)} is a B-spline function over pseudotime t.
-#'
 #' A group lasso penalty is applied to induce sparsity at the SNP level, i.e., only a small number of cis-SNPs have non-zero effects on gene expression.
 #'
+#' @import grpreg
+#' @import splines
+#' @import dplyr
 #' @export
 twist_train_model <- function(y, geno_cell, pt, knots=c(0.25,0.5,0.75), degree=3, lambda=NULL, nlambda=50, libsize=NULL, covar=NULL){
 

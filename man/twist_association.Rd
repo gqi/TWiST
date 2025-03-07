@@ -31,13 +31,13 @@ twist_association(
 \item{opt}{Options, including \code{max_impute} (maximum proportion of missing SNPs), \code{min_r2pred} (miminum average GWAS Z-score imputation r2), \code{degree_beta} (degree of B-spline basis functions), \code{knots_beta} (degree of B-spline basis functions), \code{logsigma2vec} (candidate log-sigma2 values for grid search).}
 }
 \value{
-A list containing the following entries:
+A list including
 \item{out.tbl}{A data frame containing gene and model information, including the following columns:
 ID (gene identifier), CHR (chromosome), P0 (start), P1 (end), tss (transcription start site), sigma2 (variance of coefficients of B-spline basis functions \eqn{\boldsymbol{\beta}}),
 p.global (p-value for global test), p.dynamic (p-value for dynamic test), p.nonlinear (p-value for nonlinear test), degree (degree of B-spline basis functions for \eqn{\beta(t)}.}
-\item{betal}{Estimated coefficients for linear component of gene-trait effect \eqn{\beta(t)}}
-\item{var.betal}{Variance-covariance matrix of \code{betal}.
-\item{beta}{Estimated coefficients for nonlinear component of gene-trait effect \eqn{\beta(t)}.}}
+\item{betal}{Estimated coefficients for linear component of gene-trait effect \eqn{\beta(t)}.}
+\item{var.betal}{Variance-covariance matrix of \code{betal}.}
+\item{beta}{Estimated coefficients for nonlinear component of gene-trait effect \eqn{\beta(t)}.}
 \item{var.beta}{Variance-covariance matrix of \code{beta}.}
 \item{knots}{Knots for B-spline basis functions for gene-trait effect \eqn{\beta(t)}.}
 }
@@ -49,8 +49,4 @@ TWiST association analysis is conducted using scalar-on-function regression, wit
 The estimated gene-trait effect is
 \deqn{\beta(t)=\beta_{l0}+\beta_{l01}t+\sum\limits_{m=1}^{M'}\beta_m\psi_m(t),}
 where \eqn{(\beta_{l0},\beta_{l01})^T} (\code{betal} in the R code) is the vector coefficients for the linear effects, and \eqn{(\beta_1,...,\beta_{M'})^T} (\code{beta} in the R code) is the vector of coefficients for the nonlinear effects.
-}
-\examples{
-# example code
-
 }

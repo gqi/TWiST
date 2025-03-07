@@ -1,11 +1,11 @@
 Package: TWiST
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Transcriptome-wide association studies in pseudotime
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Guanghao", "Qi",
+      email = "gqi@uw.edu",
       role = c("aut", "cre")
     )
   )
@@ -17,9 +17,9 @@ LazyData: true
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 4.0),
-    dplyr
 Imports:
     splines,
     grpreg,
-    fda
+    fda,
+    dplyr
 

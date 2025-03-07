@@ -2,3 +2,7 @@
 
 export(twist_association)
 export(twist_train_model)
+import(dplyr)
+import(fda)
+import(grpreg)
+import(splines)

@@ -1,8 +1,7 @@
 rm(list=ls())
 library(dplyr)
 library(plink2R)
-library(splines)
-library(fda)
+library(TWiST)
 sumstats <- data.table::fread("public_data/RA_sumstats_chr6.txt")
 ngwas <- 22350*74823/(22350+74823)
 
