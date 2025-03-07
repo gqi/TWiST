@@ -13,7 +13,7 @@ In Stage 2, we model the trait (y_i) by the aggregated effect of GReX across pse
 
 We have provided pre-trained models for CD4+ T cells, CD8+ T cells, and B cells. Users who are interested in conducting TWAS for these cell types may skip Step 1. Step-by-step tutorial is shown below
 
-### Installation
+## Installation
 
 Install `TWiST` from GitHUb:
 ```
@@ -25,7 +25,7 @@ In addition, install the `plink2R` package to read genotype data (PLINK files) i
 devtools::install_github("gabraham/plink2R/plink2R")
 ```
 
-### Pre-trained models
+## Pre-trained models
 
 Download pre-trained models for three immune cell types from folder `pretrained_models`: `twist_weights_T_CD4.rda` (CD4+ T cells), `twist_weights_T_CD8.rda` (CD8+ T cells), `twist_weights_T_CD8.rda` (B cells).
 
@@ -49,7 +49,7 @@ Each `.rda` file includes three objects:
     * `A1`: Effect allele. Coefficients in `weights_pred` are with respect to `A1`. <! -- PLINK bed file counts the number of A1 allele --> 
     * `A2`: Other allele
 
-### Example
+## Example
 To run this example, download additional datasets provided in folder `example_data`. They include:
 * `RA_sumstats_chr6.txt`: GWAS summary statistics for rheumatoid arthritis, chromosome 6 (Ishigaki et al, Nature Genetics 2022).
 * `1000G.EUR.6.{bed,bim,fam}`: 1000 Genomes European genotype data, chromosome 6. Download all the chromosomes from [here](https://data.broadinstitute.org/alkesgroup/FUSION/LDREF.tar.bz2).
@@ -107,7 +107,7 @@ str(res$out.tbl)
 #  $ degree     : num  3 3 3 3 3 3 3 3 3 3 ...
 ```
 
-QQ plots for global, dynamic and nonlinear tests:
+Create QQ plots for global, dynamic and nonlinear tests:
 ```
 library(qqman)
 par(mfrow=c(1,3))
@@ -116,4 +116,4 @@ qq(res$out.tbl$p.dynamic, main="Dynamic test", ylim=c(0,220))
 qq(res$out.tbl$p.nonlinear, main="Nonlinear test", ylim=c(0,220))
 ```
 
-<img src="/example_data/QQ_T_CD8_chr6.png" alt="QQ" width="500"/>
+<img src="/example_data/QQ_T_CD8_chr6.png" alt="QQ" width="800"/>
