@@ -14,8 +14,15 @@ In Stage 2, we model the trait (y_i) by the aggregated effect of GReX across pse
 We have provided pre-trained models for CD4+ T cells, CD8+ T cells, and B cells. Users who are interested in conducting TWAS for these cell types may skip Step 1. Step-by-step tutorial is shown below
 
 ### Installation
+
+Install `TWiST` from GitHUb:
 ```
 devtools::install_github("gqi/TWiST")
+```
+
+In addition, install the `plink2R` package to read genotype data (PLINK files) into R:
+```
+devtools::install_github("gabraham/plink2R/plink2R")
 ```
 
 ### Example
@@ -24,3 +31,20 @@ To run this example, download the data provided in folder `public_data`. They in
 * `twist_weights_{T_CD4,T_CD8,B}.rda`: Pre-trained model for CD4+ T cells, CD8+ T cells, and B cells in the OneK1K data.
 * `RA_sumstats_chr6.txt`: GWAS summary statistics for rheumatoid arthritis, chromosome 6 (Ishigaki et al, Nature Genetics 2022).
 * `1000G.EUR.6.{bed,bim,fam}`: 1000 Genomes European genotype data, chromosome 6. Download all the chromosomes from [here](https://data.broadinstitute.org/alkesgroup/FUSION/LDREF.tar.bz2).
+
+Load pre-trained models, using CD8+ T cells as an example:
+```
+ctype <- "T_CD8"
+load(paste0("public_data/twist_weights_",ctype,".rda"))
+```
+
+This `.rda` file includes three objects:
+* `wgtlist`: Information of genes for which the model has been trained. A data frame of five columns
+    * `ID`: Gene ID
+    * `CHR`: Chromosome
+    * `P0`: Gene start
+    * `P1`: Gene end
+    * `tss`: Transcription start site
+
+
+
