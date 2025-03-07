@@ -25,20 +25,11 @@ In addition, install the `plink2R` package to read genotype data (PLINK files) i
 devtools::install_github("gabraham/plink2R/plink2R")
 ```
 
-### Example
+### Pre-trained models
 
-To run this example, download the data provided in folder `public_data`. They include
-* `twist_weights_{T_CD4,T_CD8,B}.rda`: Pre-trained model for CD4+ T cells, CD8+ T cells, and B cells in the OneK1K data.
-* `RA_sumstats_chr6.txt`: GWAS summary statistics for rheumatoid arthritis, chromosome 6 (Ishigaki et al, Nature Genetics 2022).
-* `1000G.EUR.6.{bed,bim,fam}`: 1000 Genomes European genotype data, chromosome 6. Download all the chromosomes from [here](https://data.broadinstitute.org/alkesgroup/FUSION/LDREF.tar.bz2).
+Download pre-trained models for three immune cell types from folder `pretrained_models`: `twist_weights_T_CD4.rda` (CD4+ T cells), `twist_weights_T_CD8.rda` (CD8+ T cells), `twist_weights_T_CD8.rda` (B cells).
 
-Load pre-trained models, using CD8+ T cells as an example:
-```
-ctype <- "T_CD8"
-load(paste0("public_data/twist_weights_",ctype,".rda"))
-```
-
-This `.rda` file includes three objects:
+Each `.rda` file includes three objects:
 * `wgtlist`: Information of genes for which the model has been trained. A data frame of five columns:
     * `ID`: Gene ID
     * `CHR`: Chromosome
@@ -50,13 +41,79 @@ This `.rda` file includes three objects:
     * `knots`: Internal knots for B-spline basis functions that are used to model model SNP effects on gene expression. (boundary knots 0 and 1 are not included).
     * `degree`: Degree of B-spline basis functions. 
     * `n`: Number of cells in the eQTL data for model training.
-* `bim_train`: PLINK bim file from the training data where prediction models were built. Should include all the SNPs in `weights_pred`. A data frame including the following columns
+* `bim_train`: Information of model SNPs in `weights_pred` in the format of PLINK bim file. A data frame of the following columns:
     * `CHR`: Chromosome
     * `SNP`: SNP ID
     * `cM`: SNP position in centimorgan
     * `BP`: SNP position in base pair
-    * `A1`: Effect allele
+    * `A1`: Effect allele. Coefficients in `weights_pred` are with respect to `A1`. <! -- PLINK bed file counts the number of A1 allele --> 
     * `A2`: Other allele
 
+### Example
+To run this example, download additional datasets provided in folder `example_data`. They include:
+* `RA_sumstats_chr6.txt`: GWAS summary statistics for rheumatoid arthritis, chromosome 6 (Ishigaki et al, Nature Genetics 2022).
+* `1000G.EUR.6.{bed,bim,fam}`: 1000 Genomes European genotype data, chromosome 6. Download all the chromosomes from [here](https://data.broadinstitute.org/alkesgroup/FUSION/LDREF.tar.bz2).
 
+First, load required packages
+```
+library(dplyr)
+library(plink2R)
+library(TWiST)
+```
 
+Read GWAS summary statistics into R. Compute the effective sample size defined as ncases*ncontrols/(ncases+ncontrols).
+```
+sumstats <- data.table::fread("example_data/RA_sumstats_chr6.txt")
+ngwas <- 22350*74823/(22350+74823)
+```
+
+Load pre-trained models and subset to chromosome 6 (using CD8+ T cells as an example) 
+```
+# Load weights
+ctype <- "T_CD8"
+load(paste0("pretrained_models/twist_weights_",ctype,".rda"))
+wgtlist.chr <- wgtlist %>% filter(CHR==6)
+weights_pred.chr <- weights_pred[wgtlist.chr$ID]
+```
+
+Load reference genotype data - 1000 Genomes European sample
+```
+genos.chr <- read_plink("example_data/1000G.EUR.6")
+```
+
+Run TWiST association analysis
+```
+res <- twist_association(
+    sumstat=sumstats, wgtlist=wgtlist.chr, weights_pred=weights_pred.chr,
+    bim_train=bim_train, genos=genos.chr, ngwas=ngwas)
+```
+
+View results
+```
+names(res)
+# [1] "out.tbl"   "betal"     "var.betal" "beta"      "var.beta"  "knots"  
+
+str(res$out.tbl)
+# 'data.frame':	80 obs. of  10 variables:
+#  $ ID         : chr  "ENSG00000112679" "ENSG00000170542" "ENSG00000124570" "ENSG00000214113" ...
+#  $ CHR        : int  6 6 6 6 6 6 6 6 6 6 ...
+#  $ P0         : int  291630 2887500 2948393 5102827 10723148 16129356 18224099 24705294 24804513 26104104 ...
+#  $ P1         : int  351355 2903514 2972090 5261172 10731362 16148479 18265054 24721064 24936188 26104518 ...
+#  $ tss        : int  291630 2903514 2972090 5261172 10723148 16129356 18265054 24721064 24936188 26104104 ...
+#  $ sigma2     : num  2.06e-09 2.06e-09 2.06e-09 2.06e-09 2.06e-09 ...
+#  $ p.global   : num  0.779 0.133 0.1534 0.7266 0.0599 ...
+#  $ p.dynamic  : num  0.604 0.655 0.332 0.466 0.167 ...
+#  $ p.nonlinear: num  0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 0.05 ...
+#  $ degree     : num  3 3 3 3 3 3 3 3 3 3 ...
+```
+
+QQ plots for global, dynamic and nonlinear tests:
+```
+library(qqman)
+par(mfrow=c(1,3))
+qq(res$out.tbl$p.global, main="Global test", ylim=c(0,220))
+qq(res$out.tbl$p.dynamic, main="Dynamic test", ylim=c(0,220))
+qq(res$out.tbl$p.nonlinear, main="Nonlinear test", ylim=c(0,220))
+```
+
+<img src="/example_data/QQ_T_CD8_chr6.png" alt="QQ" width="500"/>

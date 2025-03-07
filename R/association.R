@@ -289,7 +289,7 @@ assoc_onegene <- function(
 #' @param weights_pred Named list where each each element is an output of twist_train_model. The number and order of genes should be the same as \code{wgtlist}. Named by \code{wgtlist$ID}.
 #' @param bim_train bim file from the training data where prediction models were built . Should include all the SNPs in \code{weights_pred}
 #' @param genos Reference data in plink format used to compute LD. Can be read into R using plink2R. A list of length 3: bed, bim, fam. Usually 1000 Genomes.
-#' @param ngwas GWAS sample size. If an integer, assumes all SNPs have the same sample size. Can also be a vector with SNP-specific sample sizes.
+#' @param ngwas GWAS effective sample size. For continuous traits, it is the total sample size; for case-control binary traits, it is ncases*ncontrols/(ncases+ncontrols). If an integer, assumes all SNPs have the same sample size. Can also be a vector with SNP-specific sample sizes.
 #' @param opt Options, including \code{max_impute} (maximum proportion of missing SNPs), \code{min_r2pred} (miminum average GWAS Z-score imputation r2), \code{degree_beta} (degree of B-spline basis functions), \code{knots_beta} (degree of B-spline basis functions), \code{logsigma2vec} (candidate log-sigma2 values for grid search).
 #'
 #' @details
