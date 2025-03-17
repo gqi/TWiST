@@ -86,7 +86,7 @@ res <- twist_association(
     bim_train=bim_train, genos=genos.chr, ngwas=ngwas)
 ```
 
-View results
+View results (type `?twist_association` for definition of the outputs)
 ```
 names(res)
 # [1] "out.tbl"   "betal"     "var.betal" "beta"      "var.beta"  "knots"  
@@ -117,4 +117,26 @@ qq(res$out.tbl$p.nonlinear, main="Nonlinear test", ylim=c(0,220))
 <img src="/example_data/QQ_T_CD8_chr6.png" alt="QQ" width="800"/>
 
 ## Example: Training prediction models
+
+If you have your own single-cell eQTL data and would like to train your own prediction model, below is an example using simulated data:
+
+First load example dataset:
+```
+load("example_data_stage1training.rda")
+```
+
+This dataset includes real genotype data and genotype principal components (PCs) from the European subset of 1000 Genomes (chromosome 6) and simulated gene expression, librarize, and covariates:
+* `gene_exp_i`: Expression count data for one gene
+* `geno_cell`: Genotype of cis-SNPs, duplicated to cell level (cells from the same individual have the same genotypes).
+* `libsize`: Library size
+* `covar`: Covariates: age, sex, 10 expression PCs (`PC_{1:10}`), 10 genotype PCs (`genPC_{1:10}`).
+
+Train prediction model (for one gene):
+```
+library(TWiST)
+model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, pt=pt, knots=c(0.25,0.5,0.75), 
+                           degree=3, lambda=NULL, nlambda=10, libsize=libsize, covar=covar)
+```
+
+Aggregate the models across genes into the format described in the previous section before proceeding to association analysis.
 

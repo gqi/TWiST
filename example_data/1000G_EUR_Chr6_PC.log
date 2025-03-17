@@ -1,0 +1,26 @@
+PLINK v1.9.0-b.7.7 64-bit (22 Oct 2024)
+Options in effect:
+  --bfile 1000G.EUR.6
+  --out 1000G_EUR_Chr6_PC
+  --pca
+
+Hostname: ms-gqi.local
+Working directory: /Users/localadmin/Dropbox/Indpt_research/scTWAS/TWiST/example_data
+Start time: Mon Mar 17 09:27:17 2025
+
+Random number seed: 1742228837
+65536 MB RAM detected; reserving 32768 MB for main workspace.
+75358 variants loaded from .bim file.
+489 people (0 males, 0 females, 489 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to 1000G_EUR_Chr6_PC.nosex .
+Using up to 11 threads (change this with --threads).
+Before main variant filters, 489 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is exactly 1.
+75358 variants and 489 people pass filters and QC.
+Note: No phenotypes present.
+Relationship matrix calculation complete.
+--pca: Results saved to 1000G_EUR_Chr6_PC.eigenval and
+1000G_EUR_Chr6_PC.eigenvec .
+
+End time: Mon Mar 17 09:27:17 2025

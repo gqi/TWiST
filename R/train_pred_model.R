@@ -28,7 +28,7 @@
 #' @import splines
 #' @import dplyr
 #' @export
-twist_train_model <- function(y, geno_cell, pt, knots=c(0.25,0.5,0.75), degree=3, lambda=NULL, nlambda=50, libsize=NULL, covar=NULL){
+twist_train_model <- function(y, geno_cell, pt, knots=c(0.25,0.5,0.75), degree=3, lambda=NULL, nlambda=20, libsize=NULL, covar=NULL){
 
     # intercept needs to be set to TRUE to get the complete set of bases (the bases sum to 1 at each pseudotime point)
     # If intercept=FALSE, bs() will remove one basis
