@@ -120,15 +120,15 @@ qq(res$out.tbl$p.nonlinear, main="Nonlinear test", ylim=c(0,220))
 
 If you have your own single-cell eQTL data and would like to train your own prediction model, below is an example using simulated data:
 
-First load example dataset:
+Load example dataset:
 ```
 load("example_data_stage1training.rda")
 ```
 
 This dataset includes real genotype data and genotype principal components (PCs) from the European subset of 1000 Genomes (chromosome 6) and simulated gene expression, librarize, and covariates:
-* `gene_exp_i`: Expression count data for one gene
+* `gene_exp_i`: Expression count data for one gene.
 * `geno_cell`: Genotype of cis-SNPs, duplicated to cell level (cells from the same individual have the same genotypes).
-* `libsize`: Library size
+* `libsize`: Library size.
 * `covar`: Covariates: age, sex, 10 expression PCs (`PC_{1:10}`), 10 genotype PCs (`genPC_{1:10}`).
 
 Train prediction model (for one gene):
@@ -138,6 +138,6 @@ model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, pt=pt, knots=c(0.2
                            degree=3, lambda=NULL, nlambda=10, libsize=libsize, covar=covar)
 ```
 
-Aggregate the models across genes into the format described in the previous section before proceeding to association analysis.
+Aggregate models across genes into the format described in the previous section before proceeding to association analysis.
 
 Codes for simulating this example dataset are provided [here](/example_data/simulate_example_training.R).
