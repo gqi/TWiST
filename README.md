@@ -140,3 +140,4 @@ model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, pt=pt, knots=c(0.2
 
 Aggregate the models across genes into the format described in the previous section before proceeding to association analysis.
 
+Codes for simulating this example dataset are provided [here](/example_data/simulate_example_training.R).
