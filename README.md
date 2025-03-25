@@ -141,3 +141,7 @@ model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, pt=pt, knots=c(0.2
 Aggregate models across genes into the format described in the previous section before proceeding to association analysis.
 
 Codes for simulating this example dataset are provided [here](/example_data/simulate_example_training.R).
+
+# Reference
+
+Qi G, Lila E, Ji Z, Shojaie A, Battle A, Sun W. Transcriptome-wide association studies at cell state level using single-cell eQTL data. medRxiv (2025): 25324128. https://doi.org/10.1101/2025.03.17.25324128
