@@ -11,7 +11,7 @@ Cell state is defined by pseudotime. This package implements two main analyses:
 
 **We have provided pre-trained models for CD4+ T cells, CD8+ T cells, and B cells. Users who are interested in these cell types may use the pre-trained models and skip Stage 1 (see example below).**
 
-## Installation
+## 1. Installation
 
 Install `TWiST` from GitHUb:
 ```
@@ -23,7 +23,7 @@ In addition, install the `plink2R` package to read genotype data (PLINK files) i
 devtools::install_github("gabraham/plink2R/plink2R")
 ```
 
-## Pre-trained models
+## 2. Pre-trained models
 
 Download pre-trained models for three immune cell types from folder `pretrained_models`: `twist_weights_T_CD4.rda` (CD4+ T cells), `twist_weights_T_CD8.rda` (CD8+ T cells), `twist_weights_T_CD8.rda` (B cells).
 
@@ -47,7 +47,7 @@ Each `.rda` file includes three objects:
     * `A1`: Effect allele. Coefficients in `weights_pred` are with respect to `A1`. <! -- PLINK bed file counts the number of A1 allele --> 
     * `A2`: Other allele
 
-## Example: Association analysis
+## 3. Example: Association analysis
 To run this example, download additional datasets provided in folder `example_data`. They include:
 * `RA_sumstats_chr6.txt`: GWAS summary statistics for rheumatoid arthritis, chromosome 6 (Ishigaki et al, Nature Genetics 2022).
 * `1000G.EUR.6.{bed,bim,fam}`: 1000 Genomes European genotype data, chromosome 6. Download all the chromosomes from [here](https://data.broadinstitute.org/alkesgroup/FUSION/LDREF.tar.bz2).
@@ -116,7 +116,7 @@ qq(res$out.tbl$p.nonlinear, main="Nonlinear test", ylim=c(0,220))
 
 <img src="/example_data/QQ_T_CD8_chr6.png" alt="QQ" width="800"/>
 
-## Example: Training prediction models
+## 4. Example: Training prediction models
 
 If you have your own single-cell eQTL data and would like to train your own prediction model, below is an example using simulated data:
 
@@ -142,6 +142,6 @@ Aggregate models across genes into the format described in the previous section 
 
 Codes for simulating this example dataset are provided [here](/example_data/simulate_example_training.R).
 
-# Reference
+## 5.Reference
 
 Qi G, Lila E, Ji Z, Shojaie A, Battle A, Sun W. Transcriptome-wide association studies at cell state level using single-cell eQTL data. medRxiv (2025): 25324128. https://doi.org/10.1101/2025.03.17.25324128
