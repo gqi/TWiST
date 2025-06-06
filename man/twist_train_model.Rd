@@ -11,9 +11,9 @@ twist_train_model(
   knots = c(0.25, 0.5, 0.75),
   degree = 3,
   lambda = NULL,
-  nlambda = 50,
-  libsize = NULL,
-  covar = NULL
+  nlambda = 20,
+  libsize,
+  covar
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ twist_train_model(
 
 \item{libsize}{Library size of the cells. Vector of length ncells.}
 
-\item{covar}{Covariates to be adjusted. Matrix of ncells x (number of covariates). Not penalized.}
+\item{covar}{Covariates to be adjusted. Numerical matrix of ncells x (number of covariates). Not penalized.}
 }
 \value{
 An object of class \code{grpreg} from the \code{grpreg} package, with the following additional entries:
