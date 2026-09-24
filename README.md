@@ -144,4 +144,4 @@ Codes for simulating this example dataset are provided [here](/example_data/simu
 
 ## 5.Reference
 
-Qi G, Lila E, Ji Z, Shojaie A, Battle A, Sun W. Transcriptome-wide association studies at cell state level using single-cell eQTL data. medRxiv (2025): 25324128. https://doi.org/10.1101/2025.03.17.25324128. In press for Cell Genomics.
+Qi G, Lila E, Ji Z, Shojaie A, Battle A, Sun W. Transcriptome-wide association studies at cell state level using single-cell eQTL data. Cell Genomics (2026). https://www.cell.com/cell-genomics/fulltext/S2666-979X(25)00316-7.
