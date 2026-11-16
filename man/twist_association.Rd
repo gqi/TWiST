@@ -20,7 +20,7 @@ twist_association(
 
 \item{wgtlist}{A data frame of gene annotation. Five columns: ID (gene identifier), CHR (chromosome), P0 (start), P1 (end), tss (transcription start site).}
 
-\item{weights_pred}{Named list where each each element is an output of twist_train_model. The number and order of genes should be the same as \code{wgtlist}. Named by \code{wgtlist$ID}.}
+\item{weights_pred}{Named list where each element is an output of twist_train_model, fast_twist_train_model, or fpca_train_model. The number and order of genes should be the same as \code{wgtlist}. Named by \code{wgtlist$ID}.}
 
 \item{bim_train}{bim file from the training data where prediction models were built . Should include all the SNPs in \code{weights_pred}}
 
