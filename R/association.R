@@ -30,7 +30,23 @@ allele.qc = function(a1,a2,ref1,ref2) {
     return(snp)
 }
 
-generate_omega <- function(knots.w, degree.w, knots.beta, degree.beta){
+generate_omega <- function(knots.w, degree.w, knots.beta, degree.beta, efunctions=NULL, bin_breaks=NULL){
+    # FPCA: eigenfunctions are constant within each pseudotime bin
+    if (!is.null(efunctions)){
+        width <- diff(bin_breaks)
+        midpoint <- bin_breaks[-length(bin_breaks)] + width/2
+        omegal <- crossprod(efunctions*width, cbind(1,midpoint))
+        pteval <- seq(0.0005,0.9995,by=0.001)
+        ptbs.beta <- bs(pteval, knots=knots.beta, degree=degree.beta, Boundary.knots=c(0,1), intercept=TRUE)
+        ptbs.beta <- ptbs.beta[,-c(1,ncol(ptbs.beta))]
+        bin <- cut(pteval, bin_breaks, include.lowest=TRUE, labels=FALSE)
+        omega <- 0.001*crossprod(efunctions[bin,,drop=FALSE], ptbs.beta)
+        bspl.beta <- create.bspline.basis(norder=degree.beta+1, breaks=c(0,knots.beta,1))
+        fd.bspl.beta <- fd(coef=diag(rep(1,bspl.beta$nbasis)), basisobj=bspl.beta)
+        omega2 <- inprod(fd.bspl.beta,fd.bspl.beta, Lfdobj1=2, Lfdobj2=2)
+        omega2 <- omega2[-c(1,nrow(omega2)),-c(1,ncol(omega2))]
+        return(list(omegal=omegal, omega=omega, omega2=omega2))
+    }
     pteval <- seq(0.0005,0.9995,by=0.001)
     ptbs.w <- bs(pteval, knots=knots.w, degree=degree.w, Boundary.knots=c(0,1), intercept=TRUE)
     omegal <- 0.001*crossprod(ptbs.w,cbind(1,pteval))
@@ -58,7 +74,8 @@ qc_impute_onegene <- function(wgt, weights_pred, wgtlist, w, bim_train, genos, s
     # Compute inner product of B-spline bases
     omegalist <- generate_omega(
         knots.w=weights_pred[[w]]$knots, degree.w=weights_pred[[w]]$degree,
-        knots.beta=opt$knots_beta, degree.beta=opt$degree_beta)
+        knots.beta=opt$knots_beta, degree.beta=opt$degree_beta,
+        efunctions=weights_pred[[w]]$efunctions, bin_breaks=weights_pred[[w]]$bin_breaks)
 
     # Remove NAs (these should not be here)
     wgt.matrix[is.na(wgt.matrix)] = 0
@@ -86,6 +103,8 @@ qc_impute_onegene <- function(wgt, weights_pred, wgtlist, w, bim_train, genos, s
 
     # Compute LD matrix
     cur.LD = t(cur.genos) %*% cur.genos / (nrow(cur.genos)-1)
+    X.lin <- wgt.matrix %*% omegalist$omegal
+    if (qr(crossprod(X.lin, cur.LD %*% X.lin))$rank < 2) return(NULL)
     cur.miss = is.na(cur.Z)
     # Impute missing Z-scores
     if ( sum(cur.miss) != 0 ) { # If there are some missing SNPs
@@ -286,7 +305,7 @@ assoc_onegene <- function(
 #'
 #' @param sumstat A data frame of GWAS summary statistics. Columns: SNP (SNP ID), A1 (effect allele), A2 (other allele), Z (z-statistic for GWAS association).
 #' @param wgtlist A data frame of gene annotation. Five columns: ID (gene identifier), CHR (chromosome), P0 (start), P1 (end), tss (transcription start site).
-#' @param weights_pred Named list where each each element is an output of twist_train_model. The number and order of genes should be the same as \code{wgtlist}. Named by \code{wgtlist$ID}.
+#' @param weights_pred Named list where each element is an output of twist_train_model, fast_twist_train_model, or fpca_train_model. The number and order of genes should be the same as \code{wgtlist}. Named by \code{wgtlist$ID}.
 #' @param bim_train bim file from the training data where prediction models were built . Should include all the SNPs in \code{weights_pred}
 #' @param genos Reference data in plink format used to compute LD. Can be read into R using plink2R. A list of length 3: bed, bim, fam. Usually 1000 Genomes.
 #' @param ngwas GWAS effective sample size. For continuous traits, it is the total sample size; for case-control binary traits, it is ncases*ncontrols/(ncases+ncontrols). If an integer, assumes all SNPs have the same sample size. Can also be a vector with SNP-specific sample sizes.
@@ -311,6 +330,7 @@ assoc_onegene <- function(
 #' @import splines
 #' @import fda
 #' @import dplyr
+#' @importFrom stats pchisq p.adjust
 #' @export
 twist_association <- function(
         sumstat, wgtlist, weights_pred, bim_train, genos, ngwas,
@@ -355,7 +375,7 @@ twist_association <- function(
     betal <- var.betal <- beta <- var.beta <- data.gene.qc <- vector("list", length=nrow(wgtlist))
     names(betal) <- names(var.betal) <- names(beta) <- names(var.beta) <- names(data.gene.qc) <- wgtlist$ID
 
-    for (w in 1:nrow(wgtlist)){
+    for (w in seq_len(nrow(wgtlist))){
         if (w%%50==0) print(paste("Processing",w,wgtlist$ID[w]))
         data.gene.qc.w <- qc_impute_onegene(wgt, weights_pred, wgtlist=wgtlist, w, bim_train, genos, sumstat, opt=opt)
 
@@ -364,7 +384,7 @@ twist_association <- function(
     }
 
     # Association analysis for each gene
-    for ( w in 1:nrow(wgtlist) ) {
+    for ( w in seq_len(nrow(wgtlist)) ) {
         if (w%%50==0) print(paste("Fitting",w,wgtlist$ID[w]))
 
         if (!is.null(data.gene.qc[[w]])){
@@ -402,12 +422,12 @@ twist_association <- function(
 
     out.tbl <- out.tbl[ind.keep,]
     weights_pred.keep <- weights_pred[ind.keep]
-    out.tbl$degree <- opt$degree_beta # sapply(weights_pred.keep, function(x) x$degree)
-    knots <- lapply(1:nrow(out.tbl), function(x) opt$knots_beta)
+    out.tbl$degree <- rep(opt$degree_beta, nrow(out.tbl)) # sapply(weights_pred.keep, function(x) x$degree)
+    knots <- lapply(seq_len(nrow(out.tbl)), function(x) opt$knots_beta)
 
     cat("Analysis completed.\n")
     cat("NOTE:",FAIL.ctr,"/",nrow(wgtlist),"genes were skipped\n")
-    if ( FAIL.ctr / nrow(wgtlist) > 0.1 ) {
+    if ( nrow(wgtlist) > 0 && FAIL.ctr / nrow(wgtlist) > 0.1 ) {
         cat("If a large number of genes were skipped, verify that your GWAS Z-scores, expression weights, and LDREF data use the same SNPs (or nearly)\n")
         cat("Or consider pre-imputing your summary statistics to the LDREF markers using summary-imputation software such as [https://github.com/bogdanlab/fizi]\n")
     }

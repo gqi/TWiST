@@ -74,4 +74,4 @@ save(gene_exp_i, geno.cell, pt, libsize, covar, file="TWiST/example_data/example
 # Training prediction model
 library(TWiST)
 model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, pt=pt, knots=c(0.25,0.5,0.75), 
-                           degree=3, lambda=NULL, nlambda=10, libsize=libsize, covar=covar)
+                           degree=3, lambda=NULL, nlambda=10, libsize=libsize, covar=covar, method="twist")

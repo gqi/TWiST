@@ -3,7 +3,7 @@
 TWiST (**TW**AS **i**n p**S**eudo**T**ime) is an R package for single-cell TWAS analysis of heterogeneous cell types, where gene expression and eQTL effects can vary along a continuous cell state within the cell type. 
 Cell state is defined by pseudotime. This package implements two main analyses:
 
-**Stage 1:** Train models to predict gene expression using cis-SNPs using single-cell eQTL data. Gene expression is modeled directly as count data. 
+**Stage 1:** Train models to predict gene expression using cis-SNPs using single-cell eQTL data. Gene expression is modeled directly as count data. The function `twist_train_model()` uses fast-TWiST (compressed FLASSO) by default, with TWiST and FPCA available through the `method` argument.
 
 **Stage 2:**: Conduct association analysis between gene expression and trait. 
 
@@ -25,7 +25,7 @@ devtools::install_github("gabraham/plink2R/plink2R")
 
 ## 2. Pre-trained models
 
-Download pre-trained models for three immune cell types from folder `pretrained_models`: `twist_weights_T_CD4.rda` (CD4+ T cells), `twist_weights_T_CD8.rda` (CD8+ T cells), `twist_weights_T_CD8.rda` (B cells).
+Download pre-trained models for three immune cell types from folder `pretrained_models`: `twist_weights_T_CD4.rda` (CD4+ T cells), `twist_weights_T_CD8.rda` (CD8+ T cells), `twist_weights_B.rda` (B cells). These models were trained on OneK1K data using the original TWiST method.
 
 Each `.rda` file includes three objects:
 * `wgtlist`: Information of genes for which the model has been trained. A data frame of five columns:
@@ -122,23 +122,41 @@ If you have your own single-cell eQTL data and would like to train your own pred
 
 Load example dataset:
 ```
-load("example_data_stage1training.rda")
+load("example_data/example_data_stage1training.rda")
 ```
 
 This dataset includes real genotype data and genotype principal components (PCs) from the European subset of 1000 Genomes (chromosome 6) and simulated gene expression, librarize, and covariates:
 * `gene_exp_i`: Expression count data for one gene.
-* `geno_cell`: Genotype of cis-SNPs, duplicated to cell level (cells from the same individual have the same genotypes).
+* `geno.cell`: Genotype of cis-SNPs, duplicated to cell level (cells from the same individual have the same genotypes). Row names identify the individual.
 * `libsize`: Library size.
 * `covar`: Covariates: age, sex, 10 expression PCs (`PC_{1:10}`), 10 genotype PCs (`genPC_{1:10}`).
 
-Train prediction model (for one gene):
+Train prediction model (for one gene). The default method is fast-TWiST, which needs `donor` to identify the individual of each cell:
 ```
 library(TWiST)
-model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, pt=pt, knots=c(0.25,0.5,0.75), 
-                           degree=3, lambda=NULL, nlambda=10, libsize=libsize, covar=covar)
+donor <- rownames(geno.cell)
+set.seed(1)
+model <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, donor=donor,
+    pt=pt, knots=c(0.25,0.5,0.75), degree=3, nlambda=10,
+    libsize=libsize, covar=covar)
 ```
 
-Aggregate models across genes into the format described in the previous section before proceeding to association analysis.
+Use `method="twist"` for the original TWiST implementation or `method="fpca"` for FPCA:
+```
+set.seed(1)
+model.twist <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell,
+    pt=pt, nlambda=10, libsize=libsize, covar=covar, method="twist")
+
+set.seed(1)
+model.fpca <- twist_train_model(y=gene_exp_i, geno_cell=geno.cell, donor=donor,
+    pt=pt, libsize=libsize, covar=covar, method="fpca")
+```
+
+FPCA uses 50 pseudotime bins and retains components explaining 99% of trajectory variation by default. These settings can be changed through `nbins` and `pve`. See `?twist_train_model` for parameters.
+
+Aggregate models across genes into the format described in the previous section before proceeding to association analysis. For FPCA, `Wmat` contains SNP-by-component coefficients; keep the eigenfunctions and other model entries with the weights.
+
+Global and dynamic P values from fast-TWiST and FPCA can be combined separately using `cauchy_combine()` (Cauchy combination test, CCT). See `?cauchy_combine` for its arguments.
 
 Codes for simulating this example dataset are provided [here](/example_data/simulate_example_training.R).
 

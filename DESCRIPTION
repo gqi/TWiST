@@ -1,7 +1,7 @@
 Package: TWiST
 Type: Package
 Title: Transcriptome-wide association studies in pseudotime
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(
     person(
       "Guanghao", "Qi",
@@ -9,17 +9,24 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: Train genetically regulated expression models along continuous
+    cell states using TWiST, fast-TWiST, or functional principal component
+    analysis, and test gene-trait associations using GWAS summary statistics.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
 Depends: 
     R (>= 4.0),
 Imports:
     splines,
     grpreg,
     fda,
-    dplyr
-
+    dplyr,
+    Rcpp,
+    glmnet,
+    lme4,
+    refund,
+    parallel,
+    stats
+LinkingTo: Rcpp
+Config/roxygen2/version: 8.1.0
